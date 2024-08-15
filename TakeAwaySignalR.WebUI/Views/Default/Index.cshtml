@@ -1,0 +1,47 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+@section Scripts{
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.min.js"></script>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <script type="text/javascript">
+                    $(document).ready(() => {
+                        var connection = new signalR.HubConnectionBuilder().withUrl("https://localhost:7232/signalrhub").build();
+                        $("#constatus").text(connection.state);
+                        connection.start().then(() => {
+                            $("#constatus").text(connection.state);
+                            setInterval(() => {
+                                connection.invoke("TotalDeliveryCount");
+                                connection.invoke("TotalDeliveryCountStatusByYolda");
+                                connection.invoke("TotalDeliveryCountStatusByHazirlaniyor");
+                            }, 1000);
+                           
+                        }).catch((err) => { console.log(err) });
+                        connection.on("ReceiveTotalDeliveryCount", (value) => {
+                            $("#txttotaldeliverycount").text(value);
+                        });
+                        connection.on("ReceiveTotalDeliveryCountStatusByYolda", (value) => {
+                            $("#txttotaldeliverycountstatusbyyolda").text(value);
+                        });
+                        connection.on("ReceiveTotalDeliveryCountStatusByHazirlaniyor", (value) => {
+                            $("#receivetotaldeliverycountstatusbyhazirlaniyor").text(value);
+                        });
+                        connection.on("ReceiveTotalDeliveryCountStatusByTeslimEdildi", (value) => {
+                            $("#receivetotaldeliverycountstatusbyteslimedildi").text(value);
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+}
+<div class="alert alert-primary">Bağlantının Durumu:  <strong id="constatus"></strong></div>
+<div class="alert alert-warning">Toplam Sipariş Sayısı:  <strong id="txttotaldeliverycount"></strong></div>
+<div class="alert alert-info">Yoldaki Sipariş Sayısı:  <strong id="txttotaldeliverycountstatusbyyolda"></strong></div>
+<div class="alert alert-danger">Hazırlanan Sipariş:  <strong id="receivetotaldeliverycountstatusbyhazirlaniyor"></strong></div>
+<div class="alert alert-dark">Teslim Edilen Sipariş:  <strong id="receivetotaldeliverycountstatusbyteslimedildi"></strong></div>
